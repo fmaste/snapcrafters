@@ -1,0 +1,27 @@
+name: dmg2img
+version: 1.6.7
+summary: Tool for converting compressed dmg files to hfsplus images.
+description: |
+  Tool for converting compressed dmg files to hfsplus images.
+base: core20
+grade: stable
+confinement: strict
+
+architectures:
+  - build-on: amd64
+
+parts:
+  dmg2iso:
+    plugin: dump
+    source: http://mirrors.kernel.org/ubuntu/pool/universe/d/dmg2img/dmg2img_1.6.7-1build1_amd64.deb
+    source-type: deb
+    stage-packages:
+      - libssl1.1
+      - zlib1g
+
+apps:
+  dmg2img:
+    command: usr/bin/dmg2img
+    plugs:
+    - home
+
