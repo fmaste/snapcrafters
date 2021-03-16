@@ -32,12 +32,6 @@ parts:
       ./configure --prefix="/snap/${SNAPCRAFT_PROJECT_NAME}/current/opt/haskell/ghc/install" 2>&1 | sudo tee "${SNAPCRAFT_PART_BUILD}/configure.log"
       DESTDIR="${SNAPCRAFT_PART_INSTALL}" make install 2>&1 | sudo tee "${SNAPCRAFT_PART_BUILD}/make-install.log"
       mv "${SNAPCRAFT_PART_INSTALL}/snap/${SNAPCRAFT_PROJECT_NAME}/current/opt" "${SNAPCRAFT_PART_INSTALL}/opt"
-    #stage:
-    #  - opt/haskell/ghc/install/bin
-    #  - opt/haskell/ghc/install/lib
-    #  - opt/haskell/ghc/install/share
-    #prime:
-    #  - opt
     build-packages:
       - build-essential
       - autoconf
