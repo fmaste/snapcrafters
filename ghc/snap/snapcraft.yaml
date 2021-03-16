@@ -1,0 +1,85 @@
+name: ghc
+version: 8.10.4
+summary: The Glasgow Haskell Compiler
+description: |
+  GHC is a state-of-the-art, open source, compiler and interactive environment for the functional language Haskell.
+  Highlights:
+  - GHC supports the entire Haskell 2010 language plus a wide variety of extensions.
+  - GHC has particularly good support for concurrency and parallelism, including support for Software Transactional Memory (STM).
+  - GHC generates fast code, particularly for concurrent programs. Take a look at GHC's performance on The Computer Language Benchmarks Game.
+  - GHC works on several platforms including Windows, Mac, Linux, most varieties of Unix, and several different processor architectures. There are detailed instructions for porting GHC to a new platform.
+  - GHC has extensive optimisation capabilities, including inter-module optimisation.
+  - GHC compiles Haskell code either directly to native code or using LLVM as a back-end. GHC can also generate C code as an intermediate target for porting to new platforms. The interactive environment compiles Haskell to bytecode, and supports execution of mixed bytecode/compiled programs.
+  - Profiling is supported, both by time/allocation and various kinds of heap profiling.
+  - GHC comes with several libraries, and thousands more are available on Hackage.
+  - GHC is heavily dependent on its users and contributors. Please come and join the mailing lists and send us your comments, suggestions, bug reports and contributions!
+
+base: core20
+grade: stable
+confinement: strict
+
+architectures:
+  - build-on: amd64
+
+parts:
+  ghc:
+    source: "https://downloads.haskell.org/~ghc/${SNAPCRAFT_PROJECT_VERSION}/ghc-${SNAPCRAFT_PROJECT_VERSION}-x86_64-deb10-linux.tar.xz"
+    source-checksum: sha256/816365565e9927459b035515a7db6a0db62f9796f327389b6f8a0035d12fbda0
+    plugin: nil
+    override-build: |
+      cd "${SNAPCRAFT_PART_SRC}"
+      ./configure --prefix="/opt/haskell/ghc/install" 2>&1 | sudo tee "${SNAPCRAFT_PART_BUILD}/configure.log"
+      DESTDIR="${SNAPCRAFT_PART_INSTALL}" make install 2>&1 | sudo tee "${SNAPCRAFT_PART_BUILD}/make-install.log"
+    #stage:
+    #  - opt/haskell/ghc/install/bin
+    #  - opt/haskell/ghc/install/lib
+    #  - opt/haskell/ghc/install/share
+    #prime:
+    #  - opt
+    build-packages:
+      - build-essential
+      - autoconf
+      - libgmp-dev
+      - libtinfo-dev
+    stage-packages:
+      - libgmp-dev
+      - libtinfo-dev
+
+apps:
+  ghc:
+    command: opt/haskell/ghc/install/bin/ghc
+    plugs:
+    - home
+  ghci:
+    command: opt/haskell/ghc/install/bin/ghci
+    plugs:
+    - home
+  ghc-pkg:
+    command: opt/haskell/ghc/install/bin/ghc-pkg
+    plugs:
+    - home
+  haddock:
+    command: opt/haskell/ghc/install/bin/haddock
+    plugs:
+    - home
+  hp2ps:
+    command: opt/haskell/ghc/install/bin/hp2ps
+    plugs:
+    - home
+  hpc:
+    command: opt/haskell/ghc/install/bin/hpc
+    plugs:
+    - home
+  hsc2hs:
+    command: opt/haskell/ghc/install/bin/hsc2hs
+    plugs:
+    - home
+  runghc:
+    command: opt/haskell/ghc/install/bin/runghc
+    plugs:
+    - home
+  runghc-haskell:
+    command: opt/haskell/ghc/install/bin/runhaskell
+    plugs:
+    - home
+

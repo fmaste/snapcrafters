@@ -12,3 +12,16 @@ Snap
 
 A snap is a bundle of an app and its dependencies that works without modification across Linux distributions.
 
+On error first try:
+snapcraft clean
+sudo snap restart multipass
+
+Docs:
+https://snapcraft.io/docs/parts-lifecycle
+https://snapcraft.io/docs/snapcraft-yaml-reference
+https://snapcraft.io/docs/snapcraft-advanced-grammar
+https://snapcraft.io/docs/snapcraft-filesets
+https://snapcraft.io/docs/snapcraft-plugins
+https://snapcraft.io/docs/supported-plugins
+https://snapcraft.io/docs/parts-environment-variables
+

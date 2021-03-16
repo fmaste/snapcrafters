@@ -1,0 +1,79 @@
+name: sublime-text
+version: "3211"
+summary: A sophisticated text editor for code, markup and prose.
+description: |
+  A sophisticated text editor for code, markup and prose.
+base: core20
+architectures:
+  - build-on: i386
+  - build-on: amd64
+
+grade: stable
+confinement: strict
+
+#layout:
+#  /opt/sublime_text:
+#    bind: $SNAP/opt/sublime_text
+
+slots:
+  dbus-sublime-text:
+    interface: dbus
+    bus: session
+    name: com.sublimetext.three
+
+apps:
+  sublime-text:
+    command: usr/local/bin/snapcraft-preload $SNAP/opt/sublime_text/sublime_text
+    slots:
+    - dbus-sublime-text
+    plugs:
+    - desktop
+    - desktop-legacy
+    - x11
+    - unity7
+    - opengl
+    - wayland
+    - browser-support
+
+parts:
+  snapcraft-preload:
+    source: https://github.com/sergiusens/snapcraft-preload.git
+    plugin: cmake
+    build-packages:
+     - on amd64:
+       - gcc-multilib
+       - g++-multilib
+  sublime-text:
+    plugin: dump
+    source: "https://download.sublimetext.com/sublime_text_3_build_${SNAPCRAFT_PROJECT_VERSION}_x64.tar.bz2"
+    #source:
+    # - on amd64:
+    #   - "https://download.sublimetext.com/sublime_text_3_build_${SNAPCRAFT_PROJECT_VERSION}_x64.tar.bz2"
+    # - else:
+    #   - "https://download.sublimetext.com/sublime_text_3_build_${SNAPCRAFT_PROJECT_VERSION}_x32.tar.bz2"
+    override-build: |
+      mkdir -p "${SNAPCRAFT_PART_INSTALL}/opt"
+      cp -r "${SNAPCRAFT_PART_SRC}" "${SNAPCRAFT_PART_INSTALL}/opt/sublime_text"
+    stage:
+      - opt
+    #organize:
+    # crash_reporter: opt/sublime_text/crash_reporter
+    # Icon: opt/sublime_text/Icon
+    # Packages: opt/sublime_text/Packages
+    # plugin_host: opt/sublime_text/plugin_host
+    # python3.3.zip: opt/sublime_text/python3.3.zip
+    # sublime_plugin.py: opt/sublime_text/sublime_plugin.py
+    # sublime.py: opt/sublime_text/sublime.py
+    # sublime_text: opt/sublime_text/sublime_text
+    stage-packages:
+      - libbsd0
+      - libffi7
+      - libgtk-3-0
+      - libpcre3
+      - libx11-6
+      - libxau6
+      - libxcb1
+      - libxdmcp6
+    build-attributes:
+      - no-patchelf
+
