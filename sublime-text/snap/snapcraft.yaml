@@ -11,10 +11,6 @@ architectures:
 grade: stable
 confinement: strict
 
-#layout:
-#  /opt/sublime_text:
-#    bind: $SNAP/opt/sublime_text
-
 slots:
   dbus-sublime-text:
     interface: dbus
@@ -23,22 +19,25 @@ slots:
 
 apps:
   sublime-text:
-    command: usr/local/bin/snapcraft-preload $SNAP/opt/sublime_text/sublime_text
+    command: bin/snapcraft-preload $SNAP/opt/sublime_text/sublime_text
     slots:
     - dbus-sublime-text
     plugs:
     - desktop
     - desktop-legacy
     - x11
-    - unity7
     - opengl
     - wayland
+    - unity7
     - browser-support
 
 parts:
   snapcraft-preload:
     source: https://github.com/sergiusens/snapcraft-preload.git
     plugin: cmake
+    organize:
+     "usr/local/bin/*": bin/
+     "usr/local/lib/*": lib/
     build-packages:
      - on amd64:
        - gcc-multilib
@@ -56,15 +55,6 @@ parts:
       cp -r "${SNAPCRAFT_PART_SRC}" "${SNAPCRAFT_PART_INSTALL}/opt/sublime_text"
     stage:
       - opt
-    #organize:
-    # crash_reporter: opt/sublime_text/crash_reporter
-    # Icon: opt/sublime_text/Icon
-    # Packages: opt/sublime_text/Packages
-    # plugin_host: opt/sublime_text/plugin_host
-    # python3.3.zip: opt/sublime_text/python3.3.zip
-    # sublime_plugin.py: opt/sublime_text/sublime_plugin.py
-    # sublime.py: opt/sublime_text/sublime.py
-    # sublime_text: opt/sublime_text/sublime_text
     stage-packages:
       - libbsd0
       - libffi7
