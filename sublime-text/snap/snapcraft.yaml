@@ -20,31 +20,49 @@ slots:
 apps:
   sublime-text:
     command: bin/snapcraft-preload $SNAP/opt/sublime_text/sublime_text
+    # This fix did not work!
+    #environment:
+      #LIBMOUNT_FSTAB: "${SNAP}/etc/fstab"
+      #LIBMOUNT_MTAB:  "${SNAP}/etc/mtab"
+      #LIBMOUNT_UTAB:  "${SNAP}/opt/sublime_text/run/mount/utab"
     slots:
     - dbus-sublime-text
     plugs:
-    - desktop
-    - desktop-legacy
     - x11
-    - opengl
-    - wayland
-    - unity7
-    - browser-support
+    - desktop
+    - mount-observe
+    - udisks2
 
 parts:
+
   snapcraft-preload:
     source: https://github.com/sergiusens/snapcraft-preload.git
     plugin: cmake
+    ####################################################################################################
+    # Fix for: https://forum.snapcraft.io/t/help-creating-a-strict-snap-that-uses-shared-memory/23369/17
+    cmake-parameters:
+    - -DCMAKE_INSTALL_PREFIX=/usr
     organize:
-     "usr/local/bin/*": bin/
-     "usr/local/lib/*": lib/
+      "usr/bin/snapcraft-preload": bin/snapcraft-preload
+      "usr/lib/libsnapcraft-preload.so": lib/libsnapcraft-preload.so
+      "usr/lib/libsnapcraft-preload32.so": lib/libsnapcraft-preload32.so
+    ####################################################################################################
     build-packages:
-     - on amd64:
-       - gcc-multilib
-       - g++-multilib
+    - on amd64:
+      - gcc-multilib
+      - g++-multilib
+    ##############################################################################################
+    # Fix for:
+    # The 'snapcraft-preload' part is missing libraries that are not included in the snap or base.
+    # They can be satisfied by adding the following entry for this part
+    stage-packages:
+    - lib32stdc++6
+    ##############################################################################################
+
   sublime-text:
     plugin: dump
     source: "https://download.sublimetext.com/sublime_text_3_build_${SNAPCRAFT_PROJECT_VERSION}_x64.tar.bz2"
+    # TODO: I don't understand the syntax.
     #source:
     # - on amd64:
     #   - "https://download.sublimetext.com/sublime_text_3_build_${SNAPCRAFT_PROJECT_VERSION}_x64.tar.bz2"
@@ -53,17 +71,47 @@ parts:
     override-build: |
       mkdir -p "${SNAPCRAFT_PART_INSTALL}/opt"
       cp -r "${SNAPCRAFT_PART_SRC}" "${SNAPCRAFT_PART_INSTALL}/opt/sublime_text"
-    stage:
-      - opt
+      # For /etc/fstab fix (see below).
+      #mkdir -p "${SNAPCRAFT_PART_INSTALL}/etc/"
+      #echo "/dev/sda1 / ext3 defaults" > "${SNAPCRAFT_PART_INSTALL}/etc/fstab"
+      # For /run/mount/utab fix (see below).
+      #mkdir -p "${SNAPCRAFT_PART_INSTALL}/opt/sublime_text/run/mount"
+      #echo "" > "${SNAPCRAFT_PART_INSTALL}/opt/sublime_text/run/mount/utab"
     stage-packages:
-      - libbsd0
-      - libffi7
-      - libgtk-3-0
-      - libpcre3
-      - libx11-6
-      - libxau6
-      - libxcb1
-      - libxdmcp6
+    - libbsd0
+    - libffi7
+    - libgtk-3-0
+    - libpcre3
+    - libx11-6
+    - libxau6
+    - libxcb1
+    - libxdmcp6
     build-attributes:
-      - no-patchelf
+    - no-patchelf
+
+#layout:
+# Fix for:
+# apparmor="DENIED" operation="open" profile="snap.sublime-text.sublime-text" name="/etc/fstab" requested_mask="r" denied_mask="r"
+#  /etc/fstab:
+#    bind-file: $SNAP/etc/fstab
+# Does not work. Cant mount anything on /run.
+#  /run/mount/utab:
+#    bind: $SNAP/run/mount/utab
+
+
+# When opening a file before connecting mount-observe and udisk2:
+# audit[7716]: AVC apparmor="DENIED" operation="open" profile="snap.sublime-text.sublime-text" name="/proc/7716/mountinfo" pid=7716 comm="gmain" requested_mask="r" denied_mask="r" fsuid=1000 ouid=1000
+# kernel: audit: type=1400 audit(1616004210.609:462): apparmor="DENIED" operation="open" profile="snap.sublime-text.sublime-text" name="/proc/7716/mountinfo" pid=7716 comm="gmain" requested_mask="r" denied_mask="r" fsuid=1000 ouid=1000
+# kernel: audit: type=1400 audit(1616004210.609:463): apparmor="DENIED" operation="open" profile="snap.sublime-text.sublime-text" name="/proc/7716/mountinfo" pid=7716 comm="sublime_text" requested_mask="r" denied_mask="r" fsuid=1000 ouid=1000
+# kernel: audit: type=1400 audit(1616004210.609:464): apparmor="DENIED" operation="open" profile="snap.sublime-text.sublime-text" name="/proc/7716/mounts" pid=7716 comm="sublime_text" requested_mask="r" denied_mask="r" fsuid=1000 ouid=1000
+# audit[7716]: AVC apparmor="DENIED" operation="open" profile="snap.sublime-text.sublime-text" name="/proc/7716/mountinfo" pid=7716 comm="sublime_text" requested_mask="r" denied_mask="r" fsuid=1000 ouid=1000
+# audit[7716]: AVC apparmor="DENIED" operation="open" profile="snap.sublime-text.sublime-text" name="/proc/7716/mounts" pid=7716 comm="sublime_text" requested_mask="r" denied_mask="r" fsuid=1000 ouid=1000
+
+# When opening a file after connecting mount-observe:
+# audit[8088]: AVC apparmor="DENIED" operation="open" profile="snap.sublime-text.sublime-text" name="/run/mount/utab" pid=8088 comm="sublime_text" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0
+# server kernel: audit: type=1400 audit(1616004382.673:484): apparmor="DENIED" operation="open" profile="snap.sublime-text.sublime-text" name="/run/mount/utab" pid=8088 comm="sublime_text" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0
+
+# When opening a file after connecting udisk2:
+# audit[8206]: AVC apparmor="DENIED" operation="open" profile="snap.sublime-text.sublime-text" name="/run/mount/utab" pid=8206 comm="sublime_text" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0
+# kernel: audit: type=1400 audit(1616004435.553:502): apparmor="DENIED" operation="open" profile="snap.sublime-text.sublime-text" name="/run/mount/utab" pid=8206 comm="sublime_text" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0
 
