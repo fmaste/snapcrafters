@@ -1,0 +1,56 @@
+name: ansible
+version: "2.13"
+summary: Red Hat Ansible Automation Platform
+description: |
+  Red Hat® Ansible® Automation Platform is a foundation for building and operating automation across an organization. The platform includes all the tools needed to implement enterprise-wide automation
+base: core20
+grade: stable
+confinement: strict
+
+architectures:
+  - build-on: amd64
+
+parts:
+  # https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#running-the-devel-branch-from-a-clone
+  ansible:
+    source: https://github.com/ansible/ansible.git
+    source-type: git
+    source-branch: "stable-${SNAPCRAFT_PROJECT_VERSION}"
+    plugin: python
+    requirements:
+      - requirements.txt
+#
+#    plugin: nil
+#    override-build: |
+#      cd ansible
+#      source ./hacking/env-setup
+#      # If you want to suppress spurious warnings/errors, use:
+#      # source ./hacking/env-setup -q
+#      # If you do not have pip installed in your version of Python, install it:
+#      curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+#      python get-pip.py --user
+#      # Ansible also uses the following Python modules that need to be installed
+#      python -m pip install --user -r ./requirements.txt
+#    build-packages:
+#      - python3
+#    stage-packages:
+#      - python3
+#
+
+apps:
+  ansible:
+    command: bin/ansible
+    plugs:
+    - home
+  config:
+    command: bin/ansible-config
+    plugs:
+    - home
+  connection:
+    command: bin/ansible-connection
+    plugs:
+    - home
+  inventory:
+    command: bin/ansible-inventory
+    plugs:
+    - home
