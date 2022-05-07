@@ -11,17 +11,17 @@ architectures:
   - build-on: amd64
 
 parts:
-  dmg2iso:
+  mendeleydesktop:
     plugin: dump
-    source: https://desktop-download.mendeley.com/download/apt/pool/main/m/mendeleydesktop/mendeleydesktop_1.19.8-stable_amd64.deb
-    source-type: deb
-    stage-packages:
-      - libssl1.1
-      - zlib1g
+    source: https://desktop-download.mendeley.com/download/linux/mendeleydesktop-1.19.8-linux-x86_64.tar.bz2
+#    source-type: bzr
+#    source: https://desktop-download.mendeley.com/download/apt/pool/main/m/mendeleydesktop/mendeleydesktop_1.19.8-stable_amd64.deb
+#    source-type: deb
+#    stage-packages:
 
 apps:
   mendeleydesktop:
-    command: usr/bin/mendeleydesktop
+    command: bin/mendeleydesktop
     plugs:
     - home
 
