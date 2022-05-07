@@ -1,0 +1,27 @@
+name: mendeleydesktop
+version: 1.19.8
+summary: Mendeley reference manager.
+description: |
+  Mendeley brings your research to life, so you can make an impact on tomorrow.
+base: core20
+grade: stable
+confinement: strict
+
+architectures:
+  - build-on: amd64
+
+parts:
+  dmg2iso:
+    plugin: dump
+    source: https://desktop-download.mendeley.com/download/apt/pool/main/m/mendeleydesktop/mendeleydesktop_1.19.8-stable_amd64.deb
+    source-type: deb
+    stage-packages:
+      - libssl1.1
+      - zlib1g
+
+apps:
+  mendeleydesktop:
+    command: usr/bin/mendeleydesktop
+    plugs:
+    - home
+
