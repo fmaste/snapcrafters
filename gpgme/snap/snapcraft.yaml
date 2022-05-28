@@ -19,10 +19,43 @@ parts:
     source: https://dev.gnupg.org/source/gpgme.git
     source-type: git
     source-tag: "gpgme-${SNAPCRAFT_PROJECT_VERSION}"
-    plugin: make
+    plugin: autotools
+    build-packages:
+      - libgpg-error-dev
+      - libassuan-dev
+      - libksba-dev
+      - texinfo
+    stage-packages:
+      - gpg
+      - gpgsm
+      - libgpgme11
+
+plugs:
+  gnupg:
+    interface: personal-files
+    read:
+    - $HOME/.gnupg
 
 apps:
-  ansible:
-    command: usr/local/bin/gpgme
+  gpgme:
+    command: usr/local/bin/gpgme-tool
     plugs:
-    - home
+      - home
+      - gnupg
+#    environment:
+#      HOME: $SNAP_USER_COMMON
+  config:
+    command: usr/local/bin/gpgme-config
+    plugs:
+      - home
+      - gnupg
+#    environment:
+#      HOME: $SNAP_USER_COMMON
+  json:
+    command: usr/local/bin/gpgme-json
+    plugs:
+      - home
+      - gnupg
+#    environment:
+#      HOME: $SNAP_USER_COMMON
+
